@@ -83,10 +83,11 @@ export class PollService {
 
     const cacheKey = `poll_results:${pollId}`;
     const cachedResults = await this.redisClient.get(cacheKey);
+    console.log(cachedResults);
     if (cachedResults) {
+      console.log('Cache HIT for poll:', pollId);
       return JSON.parse(cachedResults);
     }
-    console.log(cachedResults);
     
     const poll = await this.pollRepo.findOne({
       where: { id: pollId },
@@ -109,16 +110,11 @@ export class PollService {
         percentage,
       };
     });
-    if (cachedResults) {
-      console.log('Cache HIT for poll:', pollId);
-      return JSON.parse(cachedResults);
-    }
-    console.log('Cache MISS for poll:', pollId);
+
+
+    await this.redisClient.set(cacheKey, JSON.stringify(result), 'EX', 3600);
+
     return result;
   }
 
-  async clearPollResultsCache(pollId: number) {
-    const cacheKey = `poll_results:${pollId}`;
-    await this.redisClient.del(cacheKey);
-  }
 }
