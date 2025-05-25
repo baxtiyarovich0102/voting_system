@@ -14,6 +14,7 @@ import { CreateVoteInput } from './dto/create-vote.input';
 
 @Injectable()
 export class VoteService {
+  pollService: any;
   constructor(
     @InjectRepository(Vote)
     private readonly voteRepo: Repository<Vote>,
@@ -62,6 +63,8 @@ export class VoteService {
       poll,
       selectedOption: input.selectedOption,
     });
+
+    await this.pollService.clearPollResultsCache(input.pollId);
 
     return await this.voteRepo.save(vote);
   }

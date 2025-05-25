@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
@@ -10,7 +10,9 @@ import { join } from 'path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { PollModule } from './poll/poll.module';
 import { VoteModule } from './vote/vote.module';
+import Redis from 'ioredis';
 
+@Global()
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -34,6 +36,17 @@ import { VoteModule } from './vote/vote.module';
      PollModule,
      VoteModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+      {
+      provide: 'REDIS_CLIENT',
+      useFactory: () => {
+        return new Redis({
+          host: 'localhost', // yoki .env dan
+          port: 6379,
+        });
+      },
+    },
+  ],
+  exports: ['REDIS_CLIENT']
 })
 export class AppModule {}
