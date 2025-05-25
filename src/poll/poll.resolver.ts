@@ -6,6 +6,7 @@ import { UpdatePollInput } from './dto/update-poll.input';
 import { GqlAuthGuard } from 'src/guards/gql-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { PollResultType } from './dto/poll-result.type';
 
 @Resolver(() => Poll)
 export class PollResolver {
@@ -46,4 +47,11 @@ export class PollResolver {
   removePoll(@Args('id', { type: () => Int }) id: number, @CurrentUser() user:any) {
     return this.pollService.remove(id, user);
   }
+
+@UseGuards(GqlAuthGuard)
+@Query(() => [PollResultType])
+pollResults(@Args('pollId', { type: () => Int }) pollId: number, @CurrentUser()user:any) {
+  return this.pollService.getPollResults(pollId,user);
+}
+
 }

@@ -61,4 +61,36 @@ export class PollService {
     const poll = await this.findOne(id);
     return this.pollRepo.remove(poll);
   }
+
+
+
+async getPollResults(pollId: number, user: any) {
+  if (!user || user.role !== 'ADMIN')
+    throw new UnauthorizedException('Only admins can see results');
+
+  const poll = await this.pollRepo.findOne({
+    where: { id: pollId },
+    relations: ['votes'],
+  });
+
+  if (!poll) throw new NotFoundException('Poll not found');
+
+  const totalVotes = poll.votes.length;
+
+  const result = poll.options.map((option) => {
+    const votesCount = poll.votes.filter((v) => v.selectedOption === option).length;
+    const percentage = totalVotes === 0 ? 0 : +( (votesCount / totalVotes) * 100 ).toFixed(1);
+    return {
+      option,
+      votes: votesCount,
+      percentage,
+    };
+  });
+
+  return result;
+}
+
+
+
+
 }

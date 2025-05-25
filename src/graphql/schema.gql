@@ -35,10 +35,17 @@ type AuthPayload {
   user: User!
 }
 
+type PollResultType {
+  option: String!
+  votes: Int!
+  percentage: Float!
+}
+
 type Query {
   user(id: Int!): User!
   polls: [Poll!]!
   poll(id: Int!): Poll!
+  pollResults(pollId: Int!): [PollResultType!]!
 }
 
 type Mutation {
