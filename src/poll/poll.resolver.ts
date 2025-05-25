@@ -7,6 +7,7 @@ import { GqlAuthGuard } from 'src/guards/gql-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { PollResultType } from './dto/poll-result.type';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 @Resolver(() => Poll)
 export class PollResolver {
@@ -16,7 +17,7 @@ export class PollResolver {
   @Mutation(() => Poll)
   createPoll(
     @Args('createPollInput') createPollInput: CreatePollInput,
-    @CurrentUser() user: any
+    @CurrentUser() user: any,
   ) {
     return this.pollService.create(createPollInput, user);
   }
@@ -32,9 +33,9 @@ export class PollResolver {
     return this.pollService.findOne(id);
   }
 
-   @Mutation(() => Poll, {name: "updatePoll"})
+  @Mutation(() => Poll, { name: 'updatePoll' })
   @UseGuards(GqlAuthGuard)
-   updatePoll(
+  updatePoll(
     @Args('id', { type: () => Int }) id: number,
     @Args('updatePollInput') updatePollInput: UpdatePollInput,
     @CurrentUser() current_user: any,
@@ -44,14 +45,19 @@ export class PollResolver {
 
   @Mutation(() => Poll)
   @UseGuards(GqlAuthGuard)
-  removePoll(@Args('id', { type: () => Int }) id: number, @CurrentUser() user:any) {
+  removePoll(
+    @Args('id', { type: () => Int }) id: number,
+    @CurrentUser() user: any,
+  ) {
     return this.pollService.remove(id, user);
   }
 
-@UseGuards(GqlAuthGuard)
-@Query(() => [PollResultType])
-pollResults(@Args('pollId', { type: () => Int }) pollId: number, @CurrentUser()user:any) {
-  return this.pollService.getPollResults(pollId,user);
-}
-
+  @UseGuards(GqlAuthGuard)
+  @Query(() => [PollResultType])
+  pollResults(
+    @Args('pollId', { type: () => Int }) pollId: number,
+    @CurrentUser() user: any,
+  ) {
+    return this.pollService.getPollResults(pollId, user);
+  }
 }

@@ -11,12 +11,18 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { PollModule } from './poll/poll.module';
 import { VoteModule } from './vote/vote.module';
 import Redis from 'ioredis';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Global()
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      ttl: 60, // 60 soniya ichida
+      limit: 10, // maksimal 10 ta so‘rov
+    }),
     ConfigModule.forRoot({ isGlobal: true }),
-     TypeOrmModule.forRoot({
+    TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
       port: 5432,
@@ -32,12 +38,14 @@ import Redis from 'ioredis';
       context: ({ req }) => ({ req }),
     }),
     AuthModule,
-     UserModule,
-     PollModule,
-     VoteModule],
+    UserModule,
+    PollModule,
+    VoteModule,
+  ],
   controllers: [AppController],
-  providers: [AppService,
-      {
+  providers: [
+    AppService,
+    {
       provide: 'REDIS_CLIENT',
       useFactory: () => {
         return new Redis({
@@ -47,6 +55,6 @@ import Redis from 'ioredis';
       },
     },
   ],
-  exports: ['REDIS_CLIENT']
+  exports: ['REDIS_CLIENT'],
 })
 export class AppModule {}
