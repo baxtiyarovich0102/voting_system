@@ -1,26 +1,68 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Vote } from './entities/vote.entity';
+import { Poll } from 'src/poll/entities/poll.entity';
+import { User } from 'src/user/entities/user.entity';
 import { CreateVoteInput } from './dto/create-vote.input';
-import { UpdateVoteInput } from './dto/update-vote.input';
 
 @Injectable()
 export class VoteService {
-  create(createVoteInput: CreateVoteInput) {
-    return 'This action adds a new vote';
-  }
+  constructor(
+    @InjectRepository(Vote)
+    private readonly voteRepo: Repository<Vote>,
 
-  findAll() {
-    return `This action returns all vote`;
-  }
+    @InjectRepository(Poll)
+    private readonly pollRepo: Repository<Poll>,
 
-  findOne(id: number) {
-    return `This action returns a #${id} vote`;
-  }
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+  ) {}
 
-  update(id: number, updateVoteInput: UpdateVoteInput) {
-    return `This action updates a #${id} vote`;
-  }
+  async createVote(input: CreateVoteInput, currentUser: any): Promise<Vote> {
+    const user = await this.userRepo.findOne({
+      where: { id: currentUser.id },
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} vote`;
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const poll = await this.pollRepo.findOne({
+      where: { id: input.pollId },
+    });
+
+    if (!poll || !poll.isActive) {
+      throw new NotFoundException('Poll not found or inactive');
+    }
+
+    if (!poll.options.includes(input.selectedOption)) {
+      throw new BadRequestException('Invalid option selected');
+    }
+
+    const existingVote = await this.voteRepo.findOne({
+      where: {
+        user: { id: user.id },
+        poll: { id: poll.id },
+      },
+    });
+
+    if (existingVote) {
+      throw new ConflictException('User has already voted on this poll');
+    }
+
+    const vote = this.voteRepo.create({
+      user,
+      poll,
+      selectedOption: input.selectedOption,
+    });
+
+    return await this.voteRepo.save(vote);
   }
 }

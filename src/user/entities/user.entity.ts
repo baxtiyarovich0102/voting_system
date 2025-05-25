@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Poll } from 'src/poll/entities/poll.entity';
+import { Vote } from 'src/vote/entities/vote.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -36,4 +37,7 @@ export class User {
 
   @OneToMany(() => Poll, (poll) => poll.createdBy)
 polls: Poll[];
+
+@OneToMany(() => Vote, vote => vote.user)
+votes: Vote[];
 }

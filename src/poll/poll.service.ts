@@ -48,14 +48,17 @@ export class PollService {
       throw new UnauthorizedException('Only admins can change polls');
     const poll = await this.pollRepo.findOneBy({id})
     if (!poll) {
-      throw new NotFoundException(`Book with id ${id} not found`);
+      throw new NotFoundException(`Poll with id ${id} not found`);
     }
     
   Object.assign(poll, updatePollInput);
     return this.pollRepo.save(poll);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} poll`;
+  async remove(id: number, user: any): Promise<Poll> {
+    if (!user || user.role !== 'ADMIN')
+      throw new UnauthorizedException('Only admins can delete books');
+    const poll = await this.findOne(id);
+    return this.pollRepo.remove(poll);
   }
 }

@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
+import { Vote } from 'src/vote/entities/vote.entity';
 
 @ObjectType()
 @Entity('polls')
@@ -28,4 +29,7 @@ export class Poll {
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
+  @OneToMany(() => Vote, vote => vote.poll)
+votes: Vote[];
 }

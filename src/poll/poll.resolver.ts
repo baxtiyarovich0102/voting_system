@@ -42,7 +42,8 @@ export class PollResolver {
   }
 
   @Mutation(() => Poll)
-  removePoll(@Args('id', { type: () => Int }) id: number) {
-    return this.pollService.remove(id);
+  @UseGuards(GqlAuthGuard)
+  removePoll(@Args('id', { type: () => Int }) id: number, @CurrentUser() user:any) {
+    return this.pollService.remove(id, user);
   }
 }
