@@ -1,0 +1,89 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Poll {
+  id: ID!
+  question: String!
+  options: [String!]!
+  isActive: Boolean!
+  createdBy: User!
+  createdAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type User {
+  id: Float!
+  name: String!
+  email: String!
+  role: String!
+  created_at: DateTime!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type Vote {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type Query {
+  user(id: Int!): User!
+  polls: [Poll!]!
+  poll(id: Int!): Poll!
+  vote(id: Int!): Vote!
+}
+
+type Mutation {
+  register(input: RegisterInput!): User!
+  login(input: LoginInput!): AuthPayload!
+  createPoll(createPollInput: CreatePollInput!): Poll!
+  updatePoll(id: Int!, updatePollInput: UpdatePollInput!): Poll!
+  removePoll(id: Int!): Poll!
+  createVote(createVoteInput: CreateVoteInput!): Vote!
+  updateVote(updateVoteInput: UpdateVoteInput!): Vote!
+  removeVote(id: Int!): Vote!
+}
+
+input RegisterInput {
+  name: String!
+  email: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input CreatePollInput {
+  """Poll question"""
+  question: String!
+
+  """Poll options"""
+  options: [String!]!
+}
+
+input UpdatePollInput {
+  question: String
+  options: [String!]
+  isActive: Boolean
+}
+
+input CreateVoteInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateVoteInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
